@@ -18,10 +18,13 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        pygame.draw.rect(screen, (0,0,255),[5,5,5,5])
+        pygame.draw.rect(screen, (100,100,255),[5,5,100,100])
 
         pygame.display.flip()
 
+
+#def display_characters(characters = []):
+#    for character in characters:
 
 
 
