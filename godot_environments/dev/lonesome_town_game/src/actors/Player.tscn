@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://graphics/cowboy_V0-export.png" type="Texture" id=1]
 [ext_resource path="res://Player.gd" type="Script" id=2]
+[ext_resource path="res://src/actors/RichTextLabel.gd" type="Script" id=3]
 
 [sub_resource type="CapsuleShape2D" id=1]
 height = 26.3328
@@ -73,3 +74,13 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="hitbox"]
 position = Vector2( -1.52588e-05, -53.1779 )
 shape = SubResource( 6 )
+
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+margin_left = -33.0
+margin_top = -155.5
+margin_right = 31.0
+margin_bottom = -115.5
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
