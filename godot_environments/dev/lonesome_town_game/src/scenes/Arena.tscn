@@ -17,7 +17,7 @@ radius = 18.4326
 height = 36.7333
 
 [sub_resource type="CapsuleShape2D" id=2]
-radius = 41.985
+radius = 33.0335
 height = 116.323
 
 [sub_resource type="CircleShape2D" id=3]
@@ -27,6 +27,8 @@ radius = 26.1908
 script = ExtResource( 10 )
 
 [node name="sol" type="StaticBody2D" parent="."]
+collision_layer = 4
+collision_mask = 0
 
 [node name="ground_V0" type="Sprite" parent="sol"]
 position = Vector2( -22.7837, 65.9255 )
@@ -40,8 +42,7 @@ polygon = PoolVector2Array( 639.64, 477.799, 638.58, 984.223, 30.9077, 1293.45, 
 position = Vector2( 40.4331, 8.3244 )
 
 [node name="Player" parent="YSort" instance=ExtResource( 2 )]
-position = Vector2( -64.4426, 161.893 )
-collision_mask = 3
+position = Vector2( -62.8552, 160.306 )
 speed = 500
 ai_control = true
 
@@ -53,7 +54,7 @@ limit_right = 600
 limit_bottom = 600
 
 [node name="Player2" parent="YSort" instance=ExtResource( 2 )]
-position = Vector2( 128.744, 67.3989 )
+position = Vector2( 130.331, 67.3989 )
 speed = 500
 ai_control = true
 
@@ -71,6 +72,7 @@ shape = SubResource( 1 )
 
 [node name="river" type="StaticBody2D" parent="YSort"]
 position = Vector2( 150.63, 33.1805 )
+collision_layer = 4
 collision_mask = 0
 
 [node name="river_V0" type="Sprite" parent="YSort/river"]
@@ -94,7 +96,7 @@ position = Vector2( -251.315, -205.386 )
 texture = ExtResource( 5 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="YSort/bush"]
-position = Vector2( 17.9797, -35.9594 )
+position = Vector2( 29.0915, -23.2602 )
 rotation = -2.03156
 shape = SubResource( 2 )
 

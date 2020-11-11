@@ -6,10 +6,11 @@ export var speed: = 10
 var _velocity: = Vector2.ZERO
 var direction: = Vector2.ZERO
 
-var attack:= "None"
+var attack_direction:= "None"
 var attack_init_time := 0.0
 var is_attacking := false
 var players_attacked := []
+var bullet_sent := false
 
 # ai variables
 export var ai_control: bool = false
@@ -28,7 +29,7 @@ func _process(delta):
 	var curr_time = OS.get_ticks_usec()
 	var time_elapsed_since_attack_init = curr_time - attack_init_time
 	if time_elapsed_since_attack_init >= 200000:
-		attack = "None"
+		attack_direction = "None"
 		is_attacking = false
 		players_attacked = []
 
@@ -44,14 +45,26 @@ func _physics_process(delta):
 
 # other funtions ==============================================================
 func handle_attacks():
-	if attack != "None":
-		var attack_collision_shape = "melee_atk_" + attack
-		var overlapping_bodies = get_node(attack_collision_shape).get_overlapping_bodies()
-		for body in overlapping_bodies:
-			if body.is_in_group("players") and !players_attacked.has(body) and !is_self(body):
-				body.reduce_health()
-				reward +=1
-				players_attacked.append(body)
+	if attack_direction != "None":
+		if Input.is_action_pressed("ranged_mode"):
+			if !bullet_sent:
+				var bullet_scene = preload("res://src/items/Bullet.tscn")
+				var bullet = bullet_scene.instance()
+				var vec_attack_direction = str_direction_to_vector(attack_direction)
+				bullet.shooter_path = get_path()
+				bullet.direction = vec_attack_direction
+				var path = str(get_owner().get_path()) + "/YSort"
+				bullet.set_position(get_position() + vec_attack_direction * 50)
+				get_node(path).add_child(bullet)
+				bullet_sent = true
+		else:
+			var attack_collision_shape = "melee_atk_" + attack_direction
+			var overlapping_bodies = get_node(attack_collision_shape).get_overlapping_bodies()
+			for body in overlapping_bodies:
+				if body.is_in_group("players") and !players_attacked.has(body) and !is_self(body):
+					body.reduce_health()
+					reward +=1
+					players_attacked.append(body)
 
 func get_reward():
 	return reward
@@ -99,40 +112,48 @@ func choose_direction_from_remote_data(action):
 
 func choose_attack_from_remote_data(action):
 	if action == 5:
-		attack = "up"
+		attack_direction = "up"
 		attack_init_time = OS.get_ticks_usec()
 		is_attacking = true
+		bullet_sent = false
 	elif action == 6:
-		attack = "right"
+		attack_direction = "right"
 		attack_init_time = OS.get_ticks_usec()
 		is_attacking = true
+		bullet_sent = false
 	elif action == 7:
-		attack = "down"
+		attack_direction = "down"
 		attack_init_time = OS.get_ticks_usec()
 		is_attacking = true
+		bullet_sent = false
 	elif action == 8:
-		attack = "left"
+		attack_direction = "left"
 		attack_init_time = OS.get_ticks_usec()
 		is_attacking = true
+		bullet_sent = false
 
 func execute_actions():
-	if is_attacking == false:
+	if is_attacking == false and ai_control == false:
 		if Input.is_action_just_pressed("melee_up"):
-			attack = "up"
+			attack_direction = "up"
 			attack_init_time = OS.get_ticks_usec()
 			is_attacking = true
+			bullet_sent = false
 		elif Input.is_action_just_pressed("melee_right"):
-			attack = "right"
+			attack_direction = "right"
 			attack_init_time = OS.get_ticks_usec()
 			is_attacking = true
+			bullet_sent = false
 		elif Input.is_action_just_pressed("melee_down"):
-			attack = "down"
+			attack_direction = "down"
 			attack_init_time = OS.get_ticks_usec()
 			is_attacking = true
+			bullet_sent = false
 		elif Input.is_action_just_pressed("melee_left"):
-			attack = "left"
+			attack_direction = "left"
 			attack_init_time = OS.get_ticks_usec()
 			is_attacking = true
+			bullet_sent = false
 		
 
 func get_direction() -> Vector2:
@@ -148,3 +169,16 @@ func calculate_move_velocity( linear_velocity: Vector2, direction: Vector2, spee
 	var out: = linear_velocity
 	out = speed * direction
 	return out
+
+func str_direction_to_vector(str_direction):
+	var vec_direction = Vector2.ZERO
+	if str_direction == "up":
+		vec_direction = Vector2(0, -1)
+	elif str_direction == "right":
+		vec_direction = Vector2(1, 0)
+	elif str_direction == "down":
+		vec_direction = Vector2(0, 1)
+	elif str_direction == "left":
+		vec_direction = Vector2(-1, 0)
+	return vec_direction
+		

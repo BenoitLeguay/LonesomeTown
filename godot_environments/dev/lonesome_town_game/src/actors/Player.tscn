@@ -24,6 +24,7 @@ extents = Vector2( 23.8638, 53.937 )
 
 [node name="Player" type="KinematicBody2D"]
 collision_layer = 2
+collision_mask = 7
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -75,7 +76,7 @@ collision_mask = 2
 position = Vector2( -1.52588e-05, -53.1779 )
 shape = SubResource( 6 )
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
+[node name="Health information" type="RichTextLabel" parent="."]
 margin_left = -33.0
 margin_top = -155.5
 margin_right = 31.0
