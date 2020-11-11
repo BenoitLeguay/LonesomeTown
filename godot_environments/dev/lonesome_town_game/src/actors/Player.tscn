@@ -28,6 +28,7 @@ collision_mask = 7
 script = ExtResource( 2 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+modulate = Color( 0.00784314, 0.0470588, 0.792157, 1 )
 rotation = 1.5708
 shape = SubResource( 1 )
 
@@ -40,6 +41,7 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="melee_atk_right"]
+modulate = Color( 1, 0, 0, 1 )
 position = Vector2( 44.7009, 0.521835 )
 shape = SubResource( 2 )
 
@@ -48,6 +50,7 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="melee_atk_left"]
+modulate = Color( 1, 0, 0, 1 )
 position = Vector2( -46.84, 1.4424 )
 shape = SubResource( 3 )
 
@@ -56,6 +59,7 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="melee_atk_up"]
+modulate = Color( 1, 0, 0, 1 )
 position = Vector2( 0.889984, -25.8722 )
 shape = SubResource( 4 )
 
@@ -64,6 +68,7 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="melee_atk_down"]
+modulate = Color( 1, 0, 0, 1 )
 position = Vector2( 1.52588e-05, 25.2417 )
 shape = SubResource( 5 )
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://graphics/ground_V0.png" type="Texture" id=1]
 [ext_resource path="res://src/actors/Player.tscn" type="PackedScene" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://graphics/tree_V0.png" type="Texture" id=8]
 [ext_resource path="res://graphics/clos_house_V0.png" type="Texture" id=9]
 [ext_resource path="res://src/scenes/Arena.gd" type="Script" id=10]
+[ext_resource path="res://src/game_mechanics/SpawnPoint.tscn" type="PackedScene" id=11]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 18.4326
@@ -40,7 +41,9 @@ polygon = PoolVector2Array( 639.64, 477.799, 638.58, 984.223, 30.9077, 1293.45, 
 [node name="YSort" type="YSort" parent="."]
 position = Vector2( 40.4331, 8.3244 )
 
-[node name="Player" parent="YSort" instance=ExtResource( 2 )]
+[node name="Player" parent="YSort" groups=[
+"players",
+] instance=ExtResource( 2 )]
 position = Vector2( -62.8552, 160.306 )
 speed = 500
 time_to_wait_before_attack = 200000
@@ -53,7 +56,9 @@ limit_top = -600
 limit_right = 600
 limit_bottom = 600
 
-[node name="Player2" parent="YSort" instance=ExtResource( 2 )]
+[node name="Player2" parent="YSort" groups=[
+"players",
+] instance=ExtResource( 2 )]
 position = Vector2( 130.331, 67.3989 )
 speed = 500
 ai_control = true
@@ -140,3 +145,18 @@ texture = ExtResource( 9 )
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="YSort/close house"]
 polygon = PoolVector2Array( 171.094, 17.4773, -145.452, 178.939, -268.396, 47.0864, -13.4611, -77.275 )
+
+[node name="SpawnPoint" parent="." instance=ExtResource( 11 )]
+position = Vector2( 221.827, 382.8 )
+
+[node name="SpawnPoint2" parent="." instance=ExtResource( 11 )]
+position = Vector2( -233.659, 355.83 )
+
+[node name="SpawnPoint3" parent="." instance=ExtResource( 11 )]
+position = Vector2( -440.425, -90.6653 )
+
+[node name="SpawnPoint4" parent="." instance=ExtResource( 11 )]
+position = Vector2( 350.681, -66.6925 )
+
+[node name="SpawnPoint5" parent="." instance=ExtResource( 11 )]
+position = Vector2( -28.3905, -348.374 )

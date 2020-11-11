@@ -23,9 +23,11 @@ var agents_names = ["Player", "Player2"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	randomize()
 	var err_message = socket.connect_to_host("127.0.0.1", 4242)
 	#time_start = OS.get_unix_time()
 	prev_time = OS.get_ticks_usec()
+	set_random_players_positions()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -186,3 +188,30 @@ func is_a_player_dead():
 		if player.is_dead:
 			return true
 	return false
+	
+func set_random_players_positions():
+	var spawn_points = get_tree().get_nodes_in_group("spawn points")
+	var busy_spawn_points = []
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		var spawn_point = select_random_spawn_point(spawn_points, busy_spawn_points)
+		busy_spawn_points += [spawn_point]
+		player.set_position(spawn_point.get_position())
+		
+func select_random_spawn_point(spawn_points, busy_spawn_points):
+	if busy_spawn_points.empty():
+		var selected_spawn_point_index = randi() % spawn_points.size()
+		return spawn_points[selected_spawn_point_index]
+	else:
+		var is_spawn_point_correct = false
+		while !is_spawn_point_correct:
+			var is_spawn_point_busy = false
+			var selected_spawn_point_index = randi() % spawn_points.size()
+			var selected_spawn_point = spawn_points[selected_spawn_point_index]
+			for busy_spawn_point in busy_spawn_points:
+				if busy_spawn_point == selected_spawn_point:
+					is_spawn_point_busy = true
+			if !is_spawn_point_busy:
+				return selected_spawn_point
+			
+	

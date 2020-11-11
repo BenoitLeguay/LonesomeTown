@@ -19,6 +19,10 @@ config/name="Lonesome Town: The Game"
 run/main_scene="res://src/scenes/Arena.tscn"
 config/icon="res://icon.png"
 
+[debug]
+
+shapes/collision/shape_color=Color( 1, 1, 1, 0.196078 )
+
 [input]
 
 move_up={
