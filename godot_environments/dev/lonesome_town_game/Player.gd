@@ -12,7 +12,7 @@ var is_attacking := false
 var players_attacked := []
 var bullet_sent := false
 var ranged_mode := false
-export var time_to_wait_before_attack :=  1000000 #200000
+export var time_to_wait_before_attack := 200000 #1000000 
 
 # ai variables
 export var ai_control: bool = false
