@@ -24,6 +24,9 @@ class GodotEnvironment:
         self.state_min = None
         self.state_max = None
 
+        self.display_actions = None
+        self.display_states = None
+
         self.set_params_from_dict(params)
 
 
@@ -35,6 +38,8 @@ class GodotEnvironment:
         self.agent_names = params.get("agent names", [])
         self.state_min = np.array(params.get("state min", [0, 0]))
         self.state_max = np.array(params.get("state min", [1000, 1000]))
+        self.display_actions = params.get("display actions", False)
+        self.display_states = params.get("display states", False)
 
 
     # Connection functions =============================================================================================
@@ -158,8 +163,10 @@ class GodotEnvironment:
 
         # Get the first state of the simulation, scale it and return it
         data_in = self.get_environment_state()
+        if self.display_states:
+            print(data_in)
         states_data = data_in["agents_data"]
-        states_data = self.scale_states_data(states_data)
+        #states_data = self.scale_states_data(states_data)
 
         return states_data
 
@@ -171,11 +178,15 @@ class GodotEnvironment:
         :return:states_data (dic), rewards_data (dic), done (boolean), n_frames (int)
         """
         request = self.create_request(agents_data=actions_data)
+        if self.display_actions:
+            print(request)
         self.client_socket.sendall(request)
 
         data_in = self.get_environment_state()
-        agents_data = data_in["agents_data"]
+        if self.display_states:
+            print(data_in)
 
+        agents_data = data_in["agents_data"]
         # splitting data
         states_data = []
         rewards_data = []
@@ -190,7 +201,7 @@ class GodotEnvironment:
         for n_agent in range(len(agents_data)):
             agents_data[n_agent]["reward"] /= n_frames
         # scaling states
-        states_data = self.scale_states_data(states_data)
+        # states_data = self.scale_states_data(states_data)
 
         # handling ending condition
         done = data_in["done"]

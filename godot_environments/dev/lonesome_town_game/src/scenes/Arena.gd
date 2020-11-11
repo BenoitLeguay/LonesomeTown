@@ -14,8 +14,9 @@ var is_first_step = false
 var can_end_game = false
 var information_sent = true
 var prev_time = 0
+export var hard_coded_fps := 0
 
-var is_rendering = true
+var is_rendering = false
 
 var agents_names = ["Player", "Player2"]
 
@@ -52,6 +53,9 @@ func set_execution_speed():
 		prev_time = cur_time
 		fps_used = min(fps_est,1000)
 	# set the physics process speed
+	#print(fps_used)
+	if hard_coded_fps != 0:
+		fps_used = hard_coded_fps
 	Engine.set_iterations_per_second(fps_used)
 	# set the clock speed accordingly.
 	Engine.set_time_scale(fps_used/60)
@@ -71,11 +75,8 @@ func get_information():
 	return [received_bytes, has_received_something]
 	
 func send_actions_to_agents(agents_data):
-	#print(agents_data)
 	for agent_data in agents_data:
-		#print(agent_data["name"])
 		var agent_path = "YSort/" + agent_data["name"]
-		#get_node(agent_path).choose_direction_from_remote_data(agent_data["action"])
 		get_node(agent_path).choose_actions_from_remote_data(agent_data["action"])
 
 func process_remote_data(received_bytes):
@@ -83,7 +84,6 @@ func process_remote_data(received_bytes):
 	# If not, get the action to do.
 	var converted_string = socket.get_string(received_bytes)
 	var input_dict = JSON.parse(converted_string).result
-	#print(input_dict)
 	if input_dict["initialization"] == true:
 		is_first_step = true
 		is_rendering = input_dict["render"]
@@ -107,27 +107,37 @@ func receive_and_process_data():
 		information_sent = false
 
 func prepare_data_to_send():
-	position = get_position()
-	
 	var data_to_send = {}
 	data_to_send["agents_data"] = []
 	for agent_name in agents_names:
 		var agent_path = "YSort/" + agent_name
-		#print(agent_path)
-		var agent_position = get_node(agent_path).get_position()
-		var agent_dict = {"name": agent_name, "state": agent_position}
-		#print(typeof(agent_position))
+		var agent_position = vector2_to_array(get_node(agent_path).get_position())
+		
+		var other_agents_positions = []
+		for other_agent_name in agents_names:
+			if other_agent_name != agent_name:
+				var other_agent_path = "YSort/" + other_agent_name
+				var other_agent_position = vector2_to_array(get_node(agent_path).get_position())
+				other_agents_positions += other_agent_position
+		var state := []
+		state += agent_position
+		if !other_agents_positions.empty():
+			state += other_agents_positions
+		
+		var agent_dict = {"name": agent_name, "state": state}
 		if is_first_step == false:
 			agent_dict["reward"] = get_node(agent_path).get_reward()
 			
 		data_to_send["agents_data"].append(agent_dict)# += agent_dict
-		#print(data_to_send)
 		
 	if is_first_step == false:
 		data_to_send["n_frames"] = frames_since_last_action_received
 		data_to_send["done"] = can_end_game
 	
 	return data_to_send
+	
+func vector2_to_array(vector):
+	return [vector.x, vector.y]
 	
 func prepare_and_send_data():
 	# making a distinction between first sending and the others
@@ -143,7 +153,6 @@ func handle_first_sending():
 	# if this is the first time data is sent to python, the format of the 
 	# data is different
 	if is_first_step == true:
-		#print("premier envoi:")
 		data_to_send = prepare_data_to_send()
 		send_data(data_to_send)
 		information_sent = true

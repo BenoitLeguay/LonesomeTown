@@ -11,6 +11,8 @@ var attack_init_time := 0.0
 var is_attacking := false
 var players_attacked := []
 var bullet_sent := false
+var ranged_mode := false
+export var time_to_wait_before_attack :=  1000000 #200000
 
 # ai variables
 export var ai_control: bool = false
@@ -28,35 +30,46 @@ func _ready():
 func _process(delta):
 	var curr_time = OS.get_ticks_usec()
 	var time_elapsed_since_attack_init = curr_time - attack_init_time
-	if time_elapsed_since_attack_init >= 200000:
+	if time_elapsed_since_attack_init >= time_to_wait_before_attack / Engine.get_time_scale():
 		attack_direction = "None"
 		is_attacking = false
 		players_attacked = []
+		
 
 func _physics_process(delta):
 	execute_actions()
+	ranged_mode = handle_ranged_mode(ranged_mode)
 	direction = get_direction()
 	_velocity = calculate_move_velocity(_velocity, direction, speed)
 	_velocity = move_and_slide(_velocity)
-	reward -= 0.01
 	handle_attacks()
+	reward -= 0.01
 	
 # collision functions =========================================================
 
 # other funtions ==============================================================
+
+func handle_ranged_mode(ranged):
+	if !ai_control:
+		ranged = Input.is_action_pressed("ranged_mode")
+	return ranged
+	
+func create_bullet():
+	if !bullet_sent:
+		var bullet_scene = preload("res://src/items/Bullet.tscn")
+		var bullet = bullet_scene.instance()
+		var vec_attack_direction = str_direction_to_vector(attack_direction)
+		bullet.shooter_path = get_path()
+		bullet.direction = vec_attack_direction
+		var path = str(get_owner().get_path()) + "/YSort"
+		bullet.set_position(get_position() + vec_attack_direction * 50)
+		get_node(path).add_child(bullet)
+		bullet_sent = true
+
 func handle_attacks():
 	if attack_direction != "None":
-		if Input.is_action_pressed("ranged_mode"):
-			if !bullet_sent:
-				var bullet_scene = preload("res://src/items/Bullet.tscn")
-				var bullet = bullet_scene.instance()
-				var vec_attack_direction = str_direction_to_vector(attack_direction)
-				bullet.shooter_path = get_path()
-				bullet.direction = vec_attack_direction
-				var path = str(get_owner().get_path()) + "/YSort"
-				bullet.set_position(get_position() + vec_attack_direction * 50)
-				get_node(path).add_child(bullet)
-				bullet_sent = true
+		if ranged_mode:
+			create_bullet()
 		else:
 			var attack_collision_shape = "melee_atk_" + attack_direction
 			var overlapping_bodies = get_node(attack_collision_shape).get_overlapping_bodies()
@@ -73,7 +86,6 @@ func reset_reward():
 	reward = 0.0
 	
 func is_self(node):
-	#print(node.get_path())
 	if node.get_path() == get_path():
 		return true
 	else:
@@ -82,7 +94,6 @@ func is_self(node):
 
 func reduce_health():
 	health -=1
-	#print(get_path())
 	print(health)
 	reward -=0.5
 	
@@ -95,6 +106,7 @@ func choose_actions_from_remote_data(action):
 	if action <=4:
 		choose_direction_from_remote_data(action)
 	else:
+		direction = Vector2(0, 0) # probablement à changer plus tard.
 		choose_attack_from_remote_data(action)
 
 func choose_direction_from_remote_data(action):
@@ -111,50 +123,41 @@ func choose_direction_from_remote_data(action):
 	return direction
 
 func choose_attack_from_remote_data(action):
-	if action == 5:
-		attack_direction = "up"
-		attack_init_time = OS.get_ticks_usec()
-		is_attacking = true
-		bullet_sent = false
-	elif action == 6:
-		attack_direction = "right"
-		attack_init_time = OS.get_ticks_usec()
-		is_attacking = true
-		bullet_sent = false
-	elif action == 7:
-		attack_direction = "down"
-		attack_init_time = OS.get_ticks_usec()
-		is_attacking = true
-		bullet_sent = false
-	elif action == 8:
-		attack_direction = "left"
-		attack_init_time = OS.get_ticks_usec()
-		is_attacking = true
-		bullet_sent = false
+	if is_attacking == false:
+		if action == 5:
+			apply_attack("up")
+		elif action == 6:
+			apply_attack("right")
+		elif action == 7:
+			apply_attack("down")
+		elif action == 8:
+			apply_attack("left")
+		elif action == 9:
+			apply_attack("up", true)
+		elif action == 10:
+			apply_attack("right", true)
+		elif action == 11:
+			apply_attack("down", true)
+		elif action == 12:
+			apply_attack("left", true)
+		
+func apply_attack(direction, ranged=false):
+	attack_direction = direction
+	attack_init_time = OS.get_ticks_usec()
+	is_attacking = true
+	bullet_sent = false
+	ranged_mode = ranged
 
 func execute_actions():
 	if is_attacking == false and ai_control == false:
 		if Input.is_action_just_pressed("melee_up"):
-			attack_direction = "up"
-			attack_init_time = OS.get_ticks_usec()
-			is_attacking = true
-			bullet_sent = false
+			apply_attack("up")
 		elif Input.is_action_just_pressed("melee_right"):
-			attack_direction = "right"
-			attack_init_time = OS.get_ticks_usec()
-			is_attacking = true
-			bullet_sent = false
+			apply_attack("right")
 		elif Input.is_action_just_pressed("melee_down"):
-			attack_direction = "down"
-			attack_init_time = OS.get_ticks_usec()
-			is_attacking = true
-			bullet_sent = false
+			apply_attack("down")
 		elif Input.is_action_just_pressed("melee_left"):
-			attack_direction = "left"
-			attack_init_time = OS.get_ticks_usec()
-			is_attacking = true
-			bullet_sent = false
-		
+			apply_attack("left")
 
 func get_direction() -> Vector2:
 	if ai_control != true:
