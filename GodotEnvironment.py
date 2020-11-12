@@ -134,14 +134,19 @@ class GodotEnvironment:
     # main functions ===================================================================================================
 
     def close(self):
+        """Properly closes the environment and the connection"""
         termination_request = self._create_request(termination=True)
         self.client_socket.sendall(termination_request)
         self._end_connection()
         self.is_godot_launched = False
 
     def _change_render_type_if_needed(self, render):
-        # Handling the case where we changed te rendering type and the godot engine is launched (not the first time the
-        # class is used). We want to close the godot session and create a new one with a different rendering parameter.
+        """
+        Handling the case where we changed te rendering type and the godot engine is launched (not the first time the
+        class is used). We want to close the godot session and create a new one with a different rendering parameter.
+        :param render: bool
+        :return:
+        """
         if (render != self.is_rendering) and self.is_godot_launched:
             if self.socket is None:
                 self._initialize_socket()
