@@ -130,3 +130,6 @@ dmypy.json
 
 #pycharm cache
 .idea/
+
+#local params
+params/default_params.json
