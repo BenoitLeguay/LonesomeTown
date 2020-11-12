@@ -46,7 +46,6 @@ position = Vector2( 40.4331, 8.3244 )
 ] instance=ExtResource( 2 )]
 position = Vector2( -62.8552, 160.306 )
 speed = 500
-ai_control = true
 
 [node name="Camera2D" type="Camera2D" parent="YSort/Player"]
 current = true

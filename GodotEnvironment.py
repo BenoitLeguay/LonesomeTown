@@ -5,6 +5,7 @@ import os
 import subprocess
 import ast
 
+
 class GodotEnvironment:
     def __init__(self, params={}):
         self.host = None
