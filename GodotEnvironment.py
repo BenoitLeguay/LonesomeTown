@@ -83,11 +83,7 @@ class GodotEnvironment:
                 if isinstance(agents_data[n_agent]["action"], np.integer):
                     agents_data[n_agent]["action"] = int(agents_data[n_agent]["action"])
             request["agents_data"] = agents_data
-            #if isinstance(action, np.ndarray):
-            #    action = action.tolist()
-            #request["action"] = int(action)
         request = json.dumps(request).encode()
-        #print(request)
         return request
 
     def get_environment_state(self):
@@ -174,7 +170,7 @@ class GodotEnvironment:
         """
         sending an action to the godot agent and returns the reward it earned, the new state of the environment and a
         boolean indicating whether the game is done.
-        :param action: dictionary
+        :param action_data: dictionary
         :return:states_data (dic), rewards_data (dic), done (boolean), n_frames (int)
         """
         request = self.create_request(agents_data=actions_data)

@@ -24,7 +24,7 @@ var agents_names = ["Player", "Player2"]
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize()
-	var err_message = socket.connect_to_host("127.0.0.1", 4242)
+	var err_message = socket.connect_to_host("127.0.0.1", 4243)
 	#time_start = OS.get_unix_time()
 	prev_time = OS.get_ticks_usec()
 	set_random_players_positions()
