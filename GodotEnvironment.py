@@ -42,9 +42,91 @@ class GodotEnvironment:
         self.display_actions = params.get("display actions", False)
         self.display_states = params.get("display states", False)
 
+    # main functions ===================================================================================================
+
+    def reset(self, render):
+        """
+        Initialize the environment and returns its first state.
+        To do so, it:
+        - handles the rendering type
+        - Creates a godot simulation instance in a subprocess if it is needed
+        - Creates a tcp connexion with the simulation
+        - Gets the initial state of the environment through the tcp connection
+        - Scale the state
+        :param render: boolean, indicates whether the simulator displays, in which case the game executes at normal
+        speed.
+        In the other case, the game executes at a higher rate (max 17 times faster, for now)
+        :return: initial state of the environment (dictionary)
+        """
+        # change render type and end simulation to restart it with the right parameter later if specified so.
+        self._change_render_type_if_needed(render)
+
+        # Initializing the socket if it's not already done.
+        if self.socket is None:
+            self._initialize_socket()
+
+        # Initializing a subprocess where a godot instance is launched, if it doesn't exist yet.
+        self._launch_simulation_if_needed()
+
+        # Creating the connexion with the simulator
+        self._wait_for_connection()
+
+        # Send the first request to get the initial state of the simulation
+        first_request = self._create_request(initialization=True)
+        self.client_socket.sendall(first_request)
+
+        # Get the first state of the simulation, scale it and return it
+        env_data = self._get_environment_state()
+        if self.display_states:
+            print(env_data)
+        states_data = env_data["agents_data"]
+        #states_data = self.scale_states_data(states_data)
+
+        return states_data
+
+    def step(self, actions_data):
+        """
+        sending an action to the godot agent and returns the reward it earned, the new state of the environment and a
+        boolean indicating whether the game is done.
+        :param action_data: dictionary
+        :return:states_data (dic), rewards_data (dic), done (boolean), n_frames (int)
+        """
+        # prepare and send data to simulation
+        request = self._create_request(agents_data=actions_data)
+        if self.display_actions:
+            print(request)
+        self.client_socket.sendall(request)
+
+        # receive environment data
+        env_data = self._get_environment_state()
+        if self.display_states:
+            print(env_data)
+
+        # splitting data
+        states_data, rewards_data = self._split_env_data(env_data["agents_data"])
+
+        n_frames = env_data["n_frames"]
+        # scaling reward
+        for n_agent in range(len(rewards_data)):
+            rewards_data[n_agent]["reward"] /= n_frames
+        # scaling states
+        # states_data = self.scale_states_data(states_data)
+
+        # handling ending condition
+        done = env_data["done"]
+        if done:
+            self._end_connection()
+
+        return states_data, rewards_data, done, n_frames
+
+    def close(self):
+        """Properly closes the environment and the connection"""
+        termination_request = self._create_request(termination=True)
+        self.client_socket.sendall(termination_request)
+        self._end_connection()
+        self.is_godot_launched = False
 
     # Connection functions =============================================================================================
-
 
     def _initialize_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -117,6 +199,7 @@ class GodotEnvironment:
         :param state_data: list of dictionaries
         :return: list of dictionaries
         """
+        state_data = json.loads(state_data)
         for n_agent, agent_data in enumerate(state_data["agents_data"]):
             if isinstance(agent_data['state'], str):
                 state_data["agents_data"][n_agent]["state"] = ast.literal_eval(agent_data["state"])
@@ -132,24 +215,23 @@ class GodotEnvironment:
         return states_data
 
 
-    # main functions ===================================================================================================
 
-    def close(self):
-        termination_request = self._create_request(termination=True)
-        self.client_socket.sendall(termination_request)
-        self._end_connection()
-        self.is_godot_launched = False
+
 
     def _change_render_type_if_needed(self, render):
-        # Handling the case where we changed te rendering type and the godot engine is launched (not the first time the
-        # class is used). We want to close the godot session and create a new one with a different rendering parameter.
+        """
+        Handling the case where we changed te rendering type and the godot engine is launched (not the first time the
+        class is used). We want to close the godot session and create a new one with a different rendering parameter.
+        :param render: bool
+        :return:
+        """
         if (render != self.is_rendering) and self.is_godot_launched:
             if self.socket is None:
                 self._initialize_socket()
             self._wait_for_connection()
 
             self.close()
-            self.is_rendering = render
+        self.is_rendering = render
 
     def _launch_simulation_if_needed(self):
         if not self.is_godot_launched:
@@ -160,46 +242,6 @@ class GodotEnvironment:
                 command = command + " --disable-render-loop --no-window"
             self.godot_process = subprocess.Popen(command, shell=True)
             self.is_godot_launched = True
-
-    def reset(self, render):
-        """
-        Initialize the environment and returns its first state.
-        To do so, it:
-        - handles the rendering type
-        - Creates a godot simulation instance in a subprocess if it is needed
-        - Creates a tcp connexion with the simulation
-        - Gets the initial state of the environment through the tcp connection
-        - Scale the state
-        :param render: boolean, indicates whether the simulator displays, in which case the game executes at normal
-        speed.
-        In the other case, the game executes at a higher rate (max 17 times faster, for now)
-        :return: initial state of the environment (dictionary)
-        """
-        # change render type and end simulation to restart it with the right parameter later if specified so.
-        self._change_render_type_if_needed(render)
-
-        # Initializing the socket if it's not already done.
-        if self.socket is None:
-            self._initialize_socket()
-
-        # Initializing a subprocess where a godot instance is launched, if it doesn't exist yet.
-        self._launch_simulation_if_needed()
-
-        # Creating the connexion with the simulator
-        self._wait_for_connection()
-
-        # Send the first request to get the initial state of the simulation
-        first_request = self._create_request(initialization=True)
-        self.client_socket.sendall(first_request)
-
-        # Get the first state of the simulation, scale it and return it
-        env_data = self._get_environment_state()
-        if self.display_states:
-            print(env_data)
-        states_data = env_data["agents_data"]
-        #states_data = self.scale_states_data(states_data)
-
-        return states_data
 
     def _split_env_data(self, agents_data):
         """
@@ -216,41 +258,6 @@ class GodotEnvironment:
             reward_data = {"name": agent_data["name"], "reward": agent_data["reward"]}
             rewards_data.append(reward_data)
         return states_data, rewards_data
-
-    def step(self, actions_data):
-        """
-        sending an action to the godot agent and returns the reward it earned, the new state of the environment and a
-        boolean indicating whether the game is done.
-        :param action_data: dictionary
-        :return:states_data (dic), rewards_data (dic), done (boolean), n_frames (int)
-        """
-        # prepare and send data to simulation
-        request = self._create_request(agents_data=actions_data)
-        if self.display_actions:
-            print(request)
-        self.client_socket.sendall(request)
-
-        # receive environment data
-        env_data = self._get_environment_state()
-        if self.display_states:
-            print(env_data)
-
-        # splitting data
-        states_data, rewards_data = self._split_env_data(env_data["agents_data"])
-
-        n_frames = env_data["n_frames"]
-        # scaling reward
-        for n_agent in range(len(rewards_data)):
-            rewards_data[n_agent]["reward"] /= n_frames
-        # scaling states
-        # states_data = self.scale_states_data(states_data)
-
-        # handling ending condition
-        done = env_data["done"]
-        if done:
-            self._end_connection()
-
-        return states_data, rewards_data, done, n_frames
 
     def scale_states_data(self, states_data):
         """
