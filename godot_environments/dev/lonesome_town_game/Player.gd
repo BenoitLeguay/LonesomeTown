@@ -75,8 +75,8 @@ func handle_attacks():
 			var overlapping_bodies = get_node(attack_collision_shape).get_overlapping_bodies()
 			for body in overlapping_bodies:
 				if body.is_in_group("players") and !players_attacked.has(body) and !is_self(body):
-					body.reduce_health()
-					reward +=1
+					var reward_from_action = body.reduce_health()
+					reward += reward_from_action
 					players_attacked.append(body)
 
 func get_reward():
@@ -93,14 +93,16 @@ func is_self(node):
 
 
 func reduce_health():
+	var reward_start = reward
 	health -=1
-	print(health)
+	handle_death()
 	reward -=0.5
+	return reward - reward_start
 	
 func handle_death():
 	if health == 0:
 		is_dead = true
-		reward -=1
+		reward -=0.5
 
 func choose_actions_from_remote_data(action):
 	if action <=4:
