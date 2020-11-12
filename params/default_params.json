@@ -1,0 +1,8 @@
+{
+  "agent names": ["Player"],
+  "host": "127.0.0.1",
+  "port": 4242,
+  "godot path": "C://Users/Hugo/Desktop/Godot_v3.2.3-stable_win64.exe",
+  "environment path": "C://Users/Hugo/Documents/AI/projects/LonesomeTown/godot_environments/dev/test_tcp/Godot-Test-v0.pck"
+
+}

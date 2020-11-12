@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="CapsuleShape2D" id=1]
+radius = 48.6569
+height = 0.0
+
+[node name="SpawnPoint" type="Area2D" groups=[
+"spawn points",
+]]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+modulate = Color( 0.835294, 0.929412, 0, 1 )
+shape = SubResource( 1 )
