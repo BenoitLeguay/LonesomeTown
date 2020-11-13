@@ -27,9 +27,9 @@ class GodotEnvironment:
 
         self.display_actions = None
         self.display_states = None
+        self.verbose = None
 
         self.set_params_from_dict(params)
-
 
     def set_params_from_dict(self, params={}):
         self.host = params.get("host", '127.0.0.1')
@@ -41,6 +41,7 @@ class GodotEnvironment:
         self.state_max = np.array(params.get("state min", [1000, 1000]))
         self.display_actions = params.get("display actions", False)
         self.display_states = params.get("display states", False)
+        self.verbose = params.get('verbose', False)
 
     # main functions ===================================================================================================
 
@@ -123,14 +124,14 @@ class GodotEnvironment:
 
     def close(self):
         """Properly closes the environment and the connection"""
-        print(self.godot_process.poll())
+        # print(self.godot_process.poll())
+
         termination_request = self._create_request(termination=True)
         self.client_socket.sendall(termination_request)
         self._end_connection()
-        print(self.godot_process.poll())
-        #self.godot_process.kill()
+        # self.godot_process.kill()
 
-        print(self.godot_process.wait())
+        self.godot_process.wait()
         self.is_godot_launched = False
 
     # Connection functions =============================================================================================
@@ -149,10 +150,12 @@ class GodotEnvironment:
         Runs until a connection is made
         :return:
         """
+        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.host, self.port))
         self.socket.listen()
         self.client_socket, addr = self.socket.accept()
-        print('Connected by', addr)
+        if self.verbose:
+            print('Connected by', addr)
 
     def _create_request(self, initialization=False, termination=False, agents_data=None):
         """
