@@ -150,7 +150,7 @@ class GodotEnvironment:
         Runs until a connection is made
         :return:
         """
-        # self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.host, self.port))
         self.socket.listen()
         self.client_socket, addr = self.socket.accept()
