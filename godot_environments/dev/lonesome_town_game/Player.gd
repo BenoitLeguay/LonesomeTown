@@ -49,6 +49,14 @@ func _physics_process(delta):
 
 # other funtions ==============================================================
 
+func reinitialize():
+	var _velocity: = Vector2.ZERO
+	var direction: = Vector2.ZERO
+	var attack_direction:= "None"
+	reward = 0.0
+	health = 3
+	is_dead = false
+
 func handle_ranged_mode(ranged):
 	if !ai_control:
 		ranged = Input.is_action_pressed("ranged_mode")
