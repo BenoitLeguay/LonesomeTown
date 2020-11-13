@@ -6,6 +6,6 @@
   "environment path": "/home/benoit/Documents/work/LonesomeTown/godot_environments/dev/lonesome_town_game/lonesome_town_v0.pck",
   "state min": [-431, -546],
   "state max": [524, 427],
-  "display actions": false,
+  "display actions": true,
   "display states": false
 }

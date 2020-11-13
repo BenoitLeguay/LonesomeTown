@@ -81,6 +81,21 @@ func send_actions_to_agents(agents_data):
 		var agent_path = "YSort/" + agent_data["name"]
 		get_node(agent_path).choose_actions_from_remote_data(agent_data["action"])
 
+func reinitialize_parameters():
+	frames_since_start = 0
+	frames_since_last_action_received = 0
+	frames_when_data_sent = 0
+	can_end_game = false
+
+func reinitialize_players():
+	set_random_players_positions()
+	reinitialize_players_information()
+	
+
+func reinitialize():
+	reinitialize_parameters()
+	reinitialize_players()
+
 func process_remote_data(received_bytes):
 	# process the input data. Detects whether it's the first data received.
 	# If not, get the action to do.
@@ -88,6 +103,7 @@ func process_remote_data(received_bytes):
 	var input_dict = JSON.parse(converted_string).result
 	if input_dict["initialization"] == true:
 		is_first_step = true
+		reinitialize()
 		is_rendering = input_dict["render"]
 	elif input_dict["termination"] == true:
 		get_tree().quit()
@@ -173,8 +189,10 @@ func handle_other_sendings():
 			# handling the end of the game
 			# it should be noted that the game keeps executing after 
 			#reload_current_scene(), until the end of the process loop.
-			socket.disconnect_from_host()
-			get_tree().reload_current_scene()
+			pass
+			# I used to do the following
+			#socket.disconnect_from_host()
+			#get_tree().reload_current_scene()
 		reset_agents_rewards()
 		#reward = 0.0
 
@@ -215,3 +233,7 @@ func select_random_spawn_point(spawn_points, busy_spawn_points):
 				return selected_spawn_point
 			
 	
+func reinitialize_players_information():
+	var players = get_tree().get_nodes_in_group("players")
+	for player in players:
+		player.reinitialize()

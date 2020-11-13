@@ -61,15 +61,14 @@ class GodotEnvironment:
         # change render type and end simulation to restart it with the right parameter later if specified so.
         self._change_render_type_if_needed(render)
 
-        # Initializing the socket if it's not already done.
-        if self.socket is None:
-            self._initialize_socket()
-
         # Initializing a subprocess where a godot instance is launched, if it doesn't exist yet.
         self._launch_simulation_if_needed()
 
-        # Creating the connexion with the simulator
-        self._wait_for_connection()
+        # Initializing the socket if it's not already done.
+        if self.socket is None:
+            self._initialize_socket()
+            # Creating the connexion with the simulator
+            self._wait_for_connection()
 
         # Send the first request to get the initial state of the simulation
         first_request = self._create_request(initialization=True)
@@ -115,15 +114,23 @@ class GodotEnvironment:
         # handling ending condition
         done = env_data["done"]
         if done:
-            self._end_connection()
+            pass
+            # self._end_connection() # I used to do it.
+            #self.close()
+
 
         return states_data, rewards_data, done, n_frames
 
     def close(self):
         """Properly closes the environment and the connection"""
+        print(self.godot_process.poll())
         termination_request = self._create_request(termination=True)
         self.client_socket.sendall(termination_request)
         self._end_connection()
+        print(self.godot_process.poll())
+        #self.godot_process.kill()
+
+        print(self.godot_process.wait())
         self.is_godot_launched = False
 
     # Connection functions =============================================================================================
