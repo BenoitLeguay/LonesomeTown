@@ -135,7 +135,7 @@ func prepare_data_to_send():
 		for other_agent_name in agents_names:
 			if other_agent_name != agent_name:
 				var other_agent_path = "YSort/" + other_agent_name
-				var other_agent_position = vector2_to_array(get_node(agent_path).get_position())
+				var other_agent_position = vector2_to_array(get_node(other_agent_path).get_position())
 				other_agents_positions += other_agent_position
 		var state := []
 		state += agent_position
