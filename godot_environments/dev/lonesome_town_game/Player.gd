@@ -44,6 +44,8 @@ func _physics_process(delta):
 	_velocity = move_and_slide(_velocity)
 	handle_attacks()
 	reward -= 0.01
+	if Input.is_action_just_pressed("melee_down"):
+		print(position)
 	
 # collision functions =========================================================
 

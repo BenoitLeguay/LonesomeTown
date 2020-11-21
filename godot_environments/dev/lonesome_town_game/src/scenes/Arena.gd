@@ -46,6 +46,8 @@ func _process(_delta):
 func _physics_process(_delta):
 	frames_since_start +=1
 	frames_since_last_action_received +=1
+	if Input.is_action_just_pressed("melee_left"):
+		print(vector2_to_array(get_node("YSort/Player").get_position()))
 	
 func set_execution_speed():
 	var fps_used = 60
