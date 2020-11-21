@@ -29,9 +29,11 @@ class GodotEnvironment:
         self.display_states = None
         self.verbose = None
         self.seed = None
-        self.is_random = None
+        self.random_generator = None
 
         self.set_params_from_dict(params)
+
+        self.set_other_params()
 
     def set_params_from_dict(self, params={}):
         self.host = params.get("host", '127.0.0.1')
@@ -44,8 +46,10 @@ class GodotEnvironment:
         self.display_actions = params.get("display actions", False)
         self.display_states = params.get("display states", False)
         self.verbose = params.get('verbose', False)
-        self.is_random = params.get("is_random", True)
-        self.seed = params.get('seed', 0)
+        self.seed = params.get('seed', np.random.randint(0, 1e5))
+
+    def set_other_params(self):
+        self.random_generator = np.random.RandomState(seed=self.seed)
 
     # main functions ===================================================================================================
 
@@ -173,8 +177,7 @@ class GodotEnvironment:
         request = {}
         request["initialization"] = initialization
         if initialization:
-            if not self.is_random:
-                request["seed"] = self.seed
+            request["seed"] = self.random_generator.randint(low=0, high=1e6)
         request["termination"] = termination
         request["render"] = self.is_rendering
         if initialization == False and termination == False:
