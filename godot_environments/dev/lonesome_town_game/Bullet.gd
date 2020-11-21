@@ -25,6 +25,6 @@ func _on_Area2D_body_entered(body):
 	if shooter_path != body.get_path():
 		if body.is_in_group("players"):
 			var reward_from_action = body.reduce_health()
-			get_tree().get_node(shooter_path).reward += reward_from_action
+			get_node(shooter_path).reward -= reward_from_action
 		queue_free()
 	pass # Replace with function body.
