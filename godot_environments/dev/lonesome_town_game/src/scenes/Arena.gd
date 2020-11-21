@@ -23,7 +23,6 @@ var agents_names = ["Player", "Player2"]
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	randomize()
 	var err_message = socket.connect_to_host("127.0.0.1", 4243)
 	#time_start = OS.get_unix_time()
 	prev_time = OS.get_ticks_usec()
@@ -98,18 +97,28 @@ func reinitialize():
 	reinitialize_parameters()
 	reinitialize_players()
 
+func handle_seed_at_initialization(input_dict):
+	if input_dict.has("seed"):
+		seed(input_dict["seed"])
+	else:
+		randomize()
+		
 func process_remote_data(received_bytes):
 	# process the input data. Detects whether it's the first data received.
 	# If not, get the action to do.
 	var converted_string = socket.get_string(received_bytes)
 	var input_dict = JSON.parse(converted_string).result
+	
 	if input_dict["initialization"] == true:
 		is_first_step = true
+		handle_seed_at_initialization(input_dict)
 		reinitialize()
 		is_rendering = input_dict["render"]
+		
 	elif input_dict["termination"] == true:
 		get_tree().quit()
 		socket.disconnect_from_host()
+		
 	else:
 		send_actions_to_agents(input_dict["agents_data"])
 		#direction = choose_direction_from_remote_data(input_dict["action"])

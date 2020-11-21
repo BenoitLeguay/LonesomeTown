@@ -28,6 +28,8 @@ class GodotEnvironment:
         self.display_actions = None
         self.display_states = None
         self.verbose = None
+        self.seed = None
+        self.is_random = None
 
         self.set_params_from_dict(params)
 
@@ -42,6 +44,8 @@ class GodotEnvironment:
         self.display_actions = params.get("display actions", False)
         self.display_states = params.get("display states", False)
         self.verbose = params.get('verbose', False)
+        self.is_random = params.get("is_random", True)
+        self.seed = params.get('seed', 0)
 
     # main functions ===================================================================================================
 
@@ -168,6 +172,9 @@ class GodotEnvironment:
         """
         request = {}
         request["initialization"] = initialization
+        if initialization:
+            if not self.is_random:
+                request["seed"] = self.seed
         request["termination"] = termination
         request["render"] = self.is_rendering
         if initialization == False and termination == False:
