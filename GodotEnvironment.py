@@ -4,10 +4,12 @@ import numpy as np
 import os
 import subprocess
 import ast
+import utils
 
 
 class GodotEnvironment:
     def __init__(self, params={}):
+
         self.host = None
         self.port = None
 
@@ -62,9 +64,8 @@ class GodotEnvironment:
         - Creates a tcp connexion with the simulation
         - Gets the initial state of the environment through the tcp connection
         - Scale the state
-        :param render: boolean, indicates whether the simulator displays, in which case the game executes at normal
-        speed.
-        In the other case, the game executes at a higher rate (max 17 times faster, for now)
+        :param render: boolean, indicates whether the simulator displays, - in which case the game executes 
+        at normal speed - or not - the game executes at a higher rate (max 17 times faster, for now)
         :return: initial state of the environment (dictionary)
         """
         # change render type and end simulation to restart it with the right parameter later if specified so.
@@ -255,9 +256,11 @@ class GodotEnvironment:
 
     def _launch_simulation_if_needed(self):
         if not self.is_godot_launched:
-            godot_path = os.path.abspath(os.path.join(os.sep, *self.godot_path_str.split("/")))
-            environment_path = os.path.abspath(os.path.join(os.sep, *self.env_path_str.split("/")))
-            command = "{} --main-pack {}".format(godot_path, environment_path)
+            self.godot_path_str = utils.get_path(self.godot_path_str, add_absolute=True)
+            self.env_path_str = utils.get_path(self.env_path_str) 
+            print(self.env_path_str)
+            print(self.godot_path_str)
+            command = "{} --main-pack {}".format(self.godot_path_str, self.env_path_str)
             if not self.is_rendering:
                 command = command + " --disable-render-loop --no-window"
             self.godot_process = subprocess.Popen(command, shell=True)
