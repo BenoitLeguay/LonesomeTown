@@ -29,7 +29,6 @@ func _ready():
 	prev_time = OS.get_ticks_usec()
 	set_random_players_positions()
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
 	if frames_since_start > 800 or is_a_player_dead():
@@ -41,7 +40,6 @@ func _process(_delta):
 	if is_really_connected:
 		receive_and_process_data()
 		prepare_and_send_data()
-		
 	
 func _physics_process(_delta):
 	frames_since_start +=1
@@ -244,7 +242,6 @@ func select_random_spawn_point(spawn_points, busy_spawn_points):
 			if !is_spawn_point_busy:
 				return selected_spawn_point
 			
-	
 func reinitialize_players_information():
 	var players = get_tree().get_nodes_in_group("players")
 	for player in players:
